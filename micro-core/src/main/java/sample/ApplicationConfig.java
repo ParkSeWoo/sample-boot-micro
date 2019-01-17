@@ -1,10 +1,8 @@
 package sample;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.*;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 
@@ -22,14 +20,12 @@ import sample.controller.*;
  * <p>クラス側でコンポーネント定義していない時はこちらで明示的に記載してください。
  */
 @Configuration
-@Import({ApplicationDbConfig.class, ApplicationSeucrityConfig.class})
+@Import({ApplicationDbConfig.class, ApplicationSecurityConfig.class})
 public class ApplicationConfig {
     
     /** SpringMvcの拡張コンフィギュレーション */
     @Configuration
-    static class WebMvcConfig extends WebMvcConfigurerAdapter {
-        @Autowired
-        private MessageSource message;
+    static class WebMvcConfig {
 
         /** HibernateのLazyLoading回避対応。  see JacksonAutoConfiguration */
         @Bean
@@ -39,16 +35,10 @@ public class ApplicationConfig {
 
         /** BeanValidationメッセージのUTF-8に対応したValidator。 */
         @Bean
-        LocalValidatorFactoryBean validator() {
+        LocalValidatorFactoryBean defaultValidator(MessageSource message) {
             LocalValidatorFactoryBean factory = new LocalValidatorFactoryBean();
             factory.setValidationMessageSource(message);
             return factory;
-        }
-
-        /** 標準Validatorの差し替えをします。 */
-        @Override
-        public org.springframework.validation.Validator getValidator() {
-            return validator();
         }
 
     }
@@ -98,9 +88,10 @@ public class ApplicationConfig {
         }
     }
     
-    /** 例外処理の API ( json 形式 ) サポート */
+    /** API ( json 形式 ) サポート */
     @Configuration
     @Import({RestErrorAdvice.class, RestErrorController.class})
-    static class ApiConfig {}
+    static class ApiConfig {
+    }
 
 }

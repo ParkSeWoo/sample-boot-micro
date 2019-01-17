@@ -7,7 +7,6 @@ import java.util.function.*;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaQuery;
 
-import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.util.Assert;
 
@@ -71,7 +70,7 @@ public class OrmTemplate {
      * <p>Pagination に設定された検索条件は無視されます。 CriteriaQuery 構築時に設定するようにしてください。
      */   
     public <T> PagingList<T> find(final CriteriaQuery<T> criteria, Optional<CriteriaQuery<Long>> criteriaCount, final Pagination page) {
-        Assert.notNull(page);
+        Assert.notNull(page, "page is required.");
         long total = criteriaCount.map(cnt -> query(cnt).getResultList().get(0)).orElse(-1L);
         if (total == 0) return new PagingList<>(new ArrayList<>(), new Pagination(page, 0));
         
@@ -196,8 +195,8 @@ public class OrmTemplate {
      */
     @SuppressWarnings("unchecked")
     public <T> PagingList<T> find(final String qlString, final Pagination page, final Object... args) {
-        long total = page.isIgnoreTotal() ? -1L : load(QueryUtils.createCountQueryFor(qlString), args);
-        List<T> list = bindArgs(em.createQuery(qlString), args, page).getResultList();
+        long total = page.isIgnoreTotal() ? -1L : load(OrmUtils.createCountQueryFor(qlString), args);
+        List<T> list = bindArgs(em.createQuery(qlString), page, args).getResultList();
         return new PagingList<>(list, new Pagination(page, total));
     }
 

@@ -18,8 +18,6 @@ import sample.context.*;
 import sample.context.actor.ActorSession;
 import sample.context.orm.*;
 import sample.context.orm.DefaultRepository.DefaultDataSourceProperties;
-import sample.microasset.context.orm.AssetRepository;
-import sample.microasset.model.AssetDataFixtures;
 import sample.model.*;
 import sample.support.MockDomainHelper;
 
@@ -35,11 +33,9 @@ public class EntityTestSupport {
     protected ActorSession session;
     protected MockDomainHelper dh;
     protected EntityManagerFactory emf;
-    protected AssetRepository rep;
-    protected DefaultRepository repDefault;
+    protected DefaultRepository rep;
     protected PlatformTransactionManager txm;
     protected DataFixtures fixtures;
-    protected AssetDataFixtures fixturesAsset;
 
     /** テスト対象とするパッケージパス(通常はtargetEntitiesの定義を推奨) */
     private String packageToScan = "sample";
@@ -108,12 +104,7 @@ public class EntityTestSupport {
 
     protected void setupRepository() {
         setupEntityManagerFactory();
-        repDefault = new DefaultRepository();
-        repDefault.setDh(SimpleObjectProvider.of(dh));
-        repDefault.setInterceptor(SimpleObjectProvider.of(entityInterceptor()));
-        repDefault.setEm(SharedEntityManagerCreator.createSharedEntityManager(emf));
-        
-        rep = new AssetRepository();
+        rep = new DefaultRepository();
         rep.setDh(SimpleObjectProvider.of(dh));
         rep.setInterceptor(SimpleObjectProvider.of(entityInterceptor()));
         rep.setEm(SharedEntityManagerCreator.createSharedEntityManager(emf));
@@ -122,14 +113,8 @@ public class EntityTestSupport {
     protected void setupDataFixtures() {
         fixtures = new DataFixtures();
         fixtures.setEncoder(encoder);
-        fixtures.setRep(repDefault);
+        fixtures.setRep(rep);
         fixtures.setTx(txm);
-
-        fixturesAsset = new AssetDataFixtures();
-        fixturesAsset.setTime(time);
-        fixturesAsset.setBusinessDay(businessDay);
-        fixturesAsset.setRep(rep);
-        fixturesAsset.setTx(txm);
     }
 
     protected void setupEntityManagerFactory() {
